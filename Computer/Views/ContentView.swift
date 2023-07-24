@@ -13,6 +13,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             Spacer()
+            
             Text(addCommma(viewModel.displayText))
                 .padding(.horizontal, 30)
                 .font(.system(size: calculatedTextSize))
@@ -20,7 +21,7 @@ struct ContentView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.3)
                 .contentShape(RoundedRectangle(cornerRadius: 0))
-            LazyVGrid(columns: Array(repeating: GridItem(), count: 4)) {
+            LazyVGrid(columns: Array(repeating: GridItem(), count: 4), spacing: 30) {
                 ForEach(viewModel.keyboard, id: \.self) { index in
                     Button {
                         viewModel.apply(index)
@@ -30,11 +31,10 @@ struct ContentView: View {
                             .frame(width: keyboardFrameSize, height: keyboardFrameSize)
                             .foregroundColor(able)
                     }
-                    .padding(.vertical, 7)
                 }
             }
             .padding()
-            .padding(.bottom, 50)
+            .padding(.bottom)
             .onAppear {
                 // データを格納するモデルが作成されていない場合、新規作成する。
                 if viewModel.data.count == 0 {
@@ -53,19 +53,27 @@ struct ContentView: View {
     ///　表示テキストに","を含める。
     /// - Parameters:
     ///   - text: ディスプレイ表示用テキスト
-    /// - Returns: コンマを含めたテキスト
+    /// - Returns: ","を含めたテキスト
     private func addCommma(_ text: String) -> String {
-        // テキストに"."や"e"が含まれていた場合、テキストをそのまま返す。そうでない場合、テキストに","を含める。
+        // テキストに"."が含まれていた場合、テキストをそのまま返す。そうでない場合、テキストに","を含める。
         if text.contains(".") {
             return text
         } else {
             var displayText: String = text              // ディスプレイ表示テキスト
             let removeText: Set<Character> = [","]      // 取り除く文字
-            var calculatedText: String = text           // ","を除いたテキスト
-            let commaCount = Int((text.count - 1) / 3)  // コンマの数
+            
+            // ","を除いたテキスト
+            var calculatedText: String = text
+            calculatedText.removeAll(where: { removeText.contains($0) })
+            
+            // "-"の数を余計にカウントしないために、"-"を除いたテキストを用意。
+            let minus: Set<Character> = ["-"]
+            var removeMinusText: String = text
+            removeMinusText.removeAll(where: { minus.contains($0) })
+            
+            let commaCount = Int((removeMinusText.count - 1) / 3)  // コンマの数
             
             for comma in 0..<commaCount {
-                calculatedText.removeAll(where: { removeText.contains($0) })
                 displayText.insert(contentsOf: ",",
                                    at: calculatedText.index(calculatedText.endIndex, offsetBy: -(comma + 1) * 3))
             }

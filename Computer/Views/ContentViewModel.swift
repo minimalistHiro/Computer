@@ -22,11 +22,7 @@ final class ContentViewModel: ObservableObject {
     @Published var isHaveDonePriorityCalculated: Bool = false   // 一度でも"×"、"÷"を計算したか否か
     @Published var isError: Bool = false                        // エラーの有無
     var keyboard: [String] {
-        if inputs == .tappedAC {
-            return  ["AC", "+/-", "←", "÷", "7", "8", "9", "×", "4", "5", "6", "-", "1", "2", "3", "+", "0", "00", ".", "="]
-        } else {
-            return  ["C", "+/-", "←", "÷", "7", "8", "9", "×", "4", "5", "6", "-", "1", "2", "3", "+", "0", "00", ".", "="]
-        }
+        return  ["AC", "C", "+/-", "÷", "7", "8", "9", "×", "4", "5", "6", "-", "1", "2", "3", "+", "0", "00", ".", "="]
     }                                                       // キーボード
     var comprehensiveCalculatedNumber: Double {
         if inputs == .tappedEqual {
@@ -44,7 +40,7 @@ final class ContentViewModel: ObservableObject {
     
     // 入力ステータス
     enum Inputs {
-        case tappedAC                   // キーボード（"AC","C"）
+        case tappedAC                   // キーボード（"AC"）
         case tappedCalculateState       // キーボード（記号）
         case tappedNumberPad            // キーボード（数字）
         case tappedDot                  // キーボード（"."）
@@ -89,7 +85,7 @@ final class ContentViewModel: ObservableObject {
             }
         } else if keyboard == "=" {
             equalProcess()
-        } else if keyboard == "AC" || keyboard == "C" {
+        } else if keyboard == "AC" {
             initializationProcess()
             inputs = .tappedAC
         } else if keyboard == "+/-" {
@@ -98,7 +94,7 @@ final class ContentViewModel: ObservableObject {
                 return
             }
             plusMinusProcess()
-        } else if keyboard == "←" {
+        } else if keyboard == "C" {
             backSpaceProcess()
         } else {
             fourArithmeticOperations(keyboard)
@@ -213,8 +209,8 @@ final class ContentViewModel: ObservableObject {
     /// - Parameters: なし
     /// - Returns: なし
     private func backSpaceProcess() {
-        // 文字入力中のみ実行。
-        if inputs == .tappedNumberPad {
+        // 数字、または点を入力中のみ実行。
+        if inputs == .tappedNumberPad || inputs == .tappedDot {
             // テキストの文字数が0、あるいは負の数の時の文字数が1だった場合、テキストを0に戻す。
             if (String(displayText.dropLast()).count == 0) || (String(displayText.dropLast()).count == 1 && displayText.contains("-")) {
                 displayText = "0"
